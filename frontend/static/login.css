@@ -1,0 +1,86 @@
+:root {
+    --gcpdBlue: #5da9e9;
+    --gcpdDarkBlue: #0a0f1a;
+    --gcpdSteel: #1c2431;
+    --gcpdAccent: #2b8dc0;
+    --lightGrey: #ccc;
+    --white: #f0f0f0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--gcpdDarkBlue);
+    color: var(--white);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-container {
+    background-color: var(--gcpdSteel);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    width: 300px;
+}
+
+.login-container h2 {
+    text-align: center;
+    color: var(--gcpdBlue);
+    margin-bottom: 1rem;
+}
+
+.login-container label {
+    color: var(--lightGrey);
+}
+
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.login-container label,
+.login-container input {
+    width: 100%;
+    text-align: left;
+}
+
+.login-container label {
+    align-self: flex-start;
+    margin-left: -10px; /* optional: adds slight padding */
+    color: var(--gcpdBlue); /* optional: if you're using a color theme */
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 8px;
+    margin: 6px 0 10px;
+    border-radius: 4px;
+    border: 1px solid var(--gcpdAccent);
+    background-color: #222;
+    color: white;
+}
+
+button {
+    width: 50%;
+    padding: 10px;
+    border: none;
+    background-color: var(--gcpdBlue);
+    color: var(--white);
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: var(--gcpdAccent);
+}
+
+.error-message {
+    color: #ff6961;
+    font-size: 0.9rem;
+    text-align: center;
+    margin-bottom: 10px;
+}

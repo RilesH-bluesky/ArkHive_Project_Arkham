@@ -4,58 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .login-container {
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            width: 300px;
-        }
-        input[type="text"], input[type="password"] {
-            width: 100%;
-            padding: 8px;
-            margin: 6px 0 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            background-color: #5c67f2;
-            color: white;
-            cursor: pointer;
-            border-radius: 4px;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #4a54e1;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 <body>
     <div class="login-container">
         <h2>Login</h2>
         {% if error %}
-            <p style="color: red;">{{ error }}</p>
+            <p class="error-message">{{ error }}</p>
         {% endif %}
         <form action="/login" method="post">
             <label for="user">Username</label>
             <input type="text" id="user" name="username" placeholder="Username" required>
             <label for="pass">Password</label>
             <input type="password" id="pass" name="password" placeholder="Password" required>
+
+            <div class="g-recaptcha" data-sitekey="6Lek7CkrAAAAAM6yPtpJQ40DQJG8LgL4Y0waxr8X"></div>
+
             <button type="submit">Login</button>
         </form>
-        
     </div>
 </body>
 </html>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>

@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="../frontend/templates")
 
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import Session
 
 from db_model import Base, Users, Messages
@@ -159,7 +159,10 @@ async def get_messages(title: str | None=None, db:Session=Depends(get_db)):
 #Get message by reciever (THis is good for showing only messages meant for the currently active account)
 @app.get("/messages/received/{user_id}")
 async def get_received_messages(user_id: int, db: Session = Depends(get_db)):
-    messages = db.query(Messages).filter(Messages.userIdReceiver == user_id).all()
+    messages = db.query(Messages).filter(
+        Messages.userIdReceiver == user_id,
+        Messages.isRead == False  # Only fetch unread messages
+    ).all()
     return messages
 
 #Get message by sender (To get the list of messages you sent)
@@ -168,7 +171,7 @@ async def get_sent_messages(user_id: int, db: Session= Depends(get_db)):
     messages = db.query(Messages).filter(Messages.userIdSender == user_id).all()
     return messages
 
-
+#get message by current user id and the id clicked on from home
 @app.get("/messages/conversation/{current_user_id}/{other_user_id}")
 async def get_conversation(current_user_id: int, other_user_id: int, db: Session = Depends(get_db)):
     key = load_key()
@@ -176,6 +179,11 @@ async def get_conversation(current_user_id: int, other_user_id: int, db: Session
         ((Messages.userIdSender == current_user_id) & (Messages.userIdReceiver == other_user_id)) |
         ((Messages.userIdSender == other_user_id) & (Messages.userIdReceiver == current_user_id))
     ).order_by(Messages.messageDate.asc()).all()
+
+    for msg in messages:
+        if msg.userIdReceiver == current_user_id and not msg.isRead:
+            msg.isRead = True
+    db.commit()
 
     # Decrypt message contents
     for msg in messages:
@@ -209,7 +217,24 @@ async def create_message(message: MessagesModel, db: Session = Depends(get_db)):
     db.commit()
 #Edit Message
 
-#Delete Message
+#getting recently interacted with
+@app.get("/messages/recent/{user_id}")
+async def get_recent_messages(user_id: int, db: Session = Depends(get_db)):
+    messages = db.query(Messages).filter(
+        (Messages.userIdSender == user_id) | (Messages.userIdReceiver == user_id)
+    ).order_by(Messages.messageDate.desc()).all()
+
+    seen = set()
+    recent = []
+
+    for msg in messages:
+        other_id = msg.userIdReceiver if msg.userIdSender == user_id else msg.userIdSender
+        if other_id not in seen:
+            recent.append(msg)
+            seen.add(other_id)
+
+    return recent
+
 
 #
 @app.get("/conversation/{other_user_id}", response_class=HTMLResponse)

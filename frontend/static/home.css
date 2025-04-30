@@ -320,6 +320,42 @@ footer {
     object-fit: cover; /* important: don't stretch image */
 }
 
+\.recent-message-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recent-message {
+    background-color: var(--gcpdSteel);
+    border: 1px solid var(--gcpdBlue);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.recent-message:hover {
+    background-color: var(--gcpdAccent);
+}
+
+.recent-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: white;
+}
+
+.recent-sender {
+    font-weight: bold;
+    color: var(--gcpdBlue);
+}
+
+.recent-snippet {
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
 
 .username {
     font-weight: bold;

@@ -31,7 +31,7 @@
                     <li>
                         <a href="/conversation/{{ msg.userIdSender }}">
                             {{ msg.content }}
-                        </a> (from ID {{ msg.userIdSender }})
+                        </a> (from {{ msg.sender_username }})                        
                     </li>
                     {% endfor %}
                 </ul>
@@ -48,22 +48,28 @@
             <hr>
             <div class="recent-item">
                 {% if recent_messages %}
-                <ul>
-                    {% for msg in recent_messages %}
-                    <li>
-                        <a href="/conversation/{{ msg.userIdReceiver if session.user_id == msg.userIdSender else msg.userIdSender }}">
-                            {{ msg.content }}
-                        </a>
-                        {% if session.user_id == msg.userIdSender %}
-                            (to ID {{ msg.userIdReceiver }})
-                        {% else %}
-                            (from ID {{ msg.userIdSender }})
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
+                    <ul class="recent-message-list">
+                        {% for msg in recent_messages %}
+                            <li class="recent-message">
+                                <a href="/conversation/{{ msg.userIdReceiver if session.user_id == msg.userIdSender else msg.userIdSender }}">
+                                    <div class="recent-meta">
+                                        <span class="recent-sender">
+                                            {% if session.user_id == msg.userIdSender %}
+                                                To: {{ users | selectattr("userId", "equalto", msg.userIdReceiver) | map(attribute="username") | first }}
+                                            {% else %}
+                                                From: {{ users | selectattr("userId", "equalto", msg.userIdSender) | map(attribute="username") | first }}
+                                            {% endif %}
+                                        </span>
+                                        <span class="recent-snippet">
+                                            {{ msg.content[:40] }}{% if msg.content|length > 40 %}...{% endif %}
+                                        </span>
+                                    </div>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 {% else %}
-                <p>No recent interactions found.</p>
+                    <p>No recent interactions found.</p>
                 {% endif %}
             </div>
         </div>
