@@ -16,6 +16,8 @@ app.secret_key = os.urandom(20)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///./backend/Arkham.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+ACCESS_CODE="GCPD2025"
+
 FASTAPI_URL = "http://127.0.0.1:8000"
 
 @app.route('/')
@@ -41,6 +43,9 @@ def login():
         if not recaptcha_result.get('success'):
             return render_template("login.html", error="reCAPTCHA verification failed.")
 
+        access_code = request.form['access_code']
+        if access_code != ACCESS_CODE:
+            return render_template("login.html", error="Invalid access code.")
         
         try:
             response = requests.post(f"{FASTAPI_URL}/login", json={

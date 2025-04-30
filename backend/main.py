@@ -7,7 +7,7 @@ from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="../frontend/templates")
 
 
-from sqlalchemy import create_engine, desc
+from sqlalchemy import create_engine, desc, Column, String
 from sqlalchemy.orm import Session
 
 from db_model import Base, Users, Messages
