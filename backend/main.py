@@ -162,6 +162,7 @@ async def get_messages_by_id(messageId: int | None=None, db:Session=Depends(get_
 @app.post("/messages/")
 async def create_message(message: MessagesModel, db:Session=Depends(get_db)):
     orm_message = Messages(**message.model_dump())
+    orm_message.content = bcrypt.hashpw(orm_message.content.encode(), bcrypt.gensalt())
     db.add(orm_message)
     db.commit()
 #Edit Message
