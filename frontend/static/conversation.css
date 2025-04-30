@@ -10,6 +10,23 @@ h1 {
     color: #5da9e9; /* soft blue for titles */
 }
 
+.back-button {
+    display: inline-block;
+    margin: 15px;
+    padding: 10px 20px;
+    background-color: #2b8dc0;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.back-button:hover {
+    background-color: #0a0f1a;
+    transform: scale(1.05);
+}
+
 #messages-container {
     background-color: #1c2431;
     padding: 20px;
