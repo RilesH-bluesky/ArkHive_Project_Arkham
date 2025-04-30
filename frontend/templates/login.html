@@ -45,6 +45,9 @@
 <body>
     <div class="login-container">
         <h2>Login</h2>
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
         <form action="/login" method="post">
             <label for="user">Username</label>
             <input type="text" id="user" name="username" placeholder="Username" required>

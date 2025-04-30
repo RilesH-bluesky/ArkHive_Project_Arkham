@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='conversation.css') }}" />
 </head>
 <body>
+    <a href="/home" class="back-button">⬅ Back</a>
     <h1>Conversation with {{ other_user_name }}</h1>
 
 
@@ -17,7 +18,7 @@
     </form>
 
     <script>
-        const currentUserId = 1; // Hardcoded for now
+        const currentUserId = Number("{{ current_user_id }}");
         const otherUserId = Number("{{ other_user_id }}");
         const otherUserName = "{{ other_user_name }}";
 

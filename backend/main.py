@@ -13,6 +13,8 @@ from sqlalchemy.orm import Session
 from db_model import Base, Users, Messages
 from api_model import UsersModel, MessagesModel, BaseModel
 
+from utils import load_key, encrypt_message, decrypt_message
+
 import bcrypt
 import api_model
 #endregion
@@ -30,7 +32,7 @@ app.add_middleware(
 #endregion
 
 #region DB Connection
-engine = create_engine("sqlite:///./Arkham_DB.db")
+engine = create_engine("sqlite:///./backend/Arkham_DB.db")
 Base.metadata.create_all(engine)
 
 def get_db():
@@ -65,13 +67,31 @@ def login_user(login: LoginRequest, db: Session = Depends(get_db)):
     username = login.username
     password = login.password
 
+    print("🔐 Incoming login:", username)
+
     user = db.query(Users).filter(Users.username == username).first()
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password")
-
-    if bcrypt.checkpw(password.encode(), user.password.encode()):
-        return {"success": True, "message": "Login successful", "user_id": user.userId}
     
+    print("📦 Stored password hash:", user.password)
+    print("🧪 Checking password match...")
+
+    try:
+        match = bcrypt.checkpw(password.encode(), user.password.encode())
+        print("✅ Password match result:", match)
+    except Exception as e:
+        print("⚠️ Error during password check:", e)
+        raise HTTPException(status_code=500, detail="Server error")
+
+    if match:
+        return {
+            "success": True,
+            "message": "Login successful",
+            "user_id": user.userId,
+            "username": user.username
+        }
+
+    print("❌ Password mismatch.")
     raise HTTPException(status_code=401, detail="Invalid username or password")
 #endregion
 #region User Endpoints
@@ -145,10 +165,19 @@ async def get_sent_messages(user_id: int, db: Session= Depends(get_db)):
 
 @app.get("/messages/conversation/{current_user_id}/{other_user_id}")
 async def get_conversation(current_user_id: int, other_user_id: int, db: Session = Depends(get_db)):
+    key = load_key()
     messages = db.query(Messages).filter(
         ((Messages.userIdSender == current_user_id) & (Messages.userIdReceiver == other_user_id)) |
         ((Messages.userIdSender == other_user_id) & (Messages.userIdReceiver == current_user_id))
     ).order_by(Messages.messageDate.asc()).all()
+
+    # Decrypt message contents
+    for msg in messages:
+        try:
+            msg.content = decrypt_message(msg.content, key)
+        except Exception:
+            msg.content = "[ERROR: Decryption failed]"
+
     return messages
 
 
@@ -160,8 +189,16 @@ async def get_messages_by_id(messageId: int | None=None, db:Session=Depends(get_
 
 #Create New Message
 @app.post("/messages/")
-async def create_message(message: MessagesModel, db:Session=Depends(get_db)):
-    orm_message = Messages(**message.model_dump())
+async def create_message(message: MessagesModel, db: Session = Depends(get_db)):
+    key = load_key()
+    encrypted_content = encrypt_message(message.content, key)
+    orm_message = Messages(
+        content=encrypted_content,
+        userIdSender=message.userIdSender,
+        userIdReceiver=message.userIdReceiver,
+        isRead=message.isRead,
+        messageDate=message.messageDate
+    )
     db.add(orm_message)
     db.commit()
 #Edit Message

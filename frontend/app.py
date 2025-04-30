@@ -19,6 +19,8 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        print("Form submitted with:", username, password)
+
         
         try:
             response = requests.post(f"{FASTAPI_URL}/login", json={
@@ -30,16 +32,21 @@ def login():
             return render_template("login.html", error="API connection error.")
 
         if result.get("success"):
-            session['username'] = username
+            session['username'] = result.get("username")
+            session['user_id'] = result.get("user_id")
             return redirect(url_for('home')) 
         else:
             return render_template("login.html", error=result.get("message", "Login failed."))
-
+    
     return render_template('login.html')
 
 @app.route('/home')
 def home():
-    username = "Guest"  # fallback hardcoded for now
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    username = session.get('username','Guest')
+    user_id=session.get("user_id",1)
 
     try:
         user_response = requests.get(f"{FASTAPI_URL}/users/username/{username}")
@@ -50,10 +57,10 @@ def home():
     # Safely set the profilePic
     profile_pic = user_data['profilePic'] if user_data and 'profilePic' in user_data else "default.png"
 
-    response_received = requests.get(f"{FASTAPI_URL}/messages/received/1")
+    response_received = requests.get(f"{FASTAPI_URL}/messages/received/{user_id}")
     received_messages = response_received.json() if response_received.status_code == 200 else []
 
-    response_recent = requests.get(f"{FASTAPI_URL}/messages/recent/1")
+    response_recent = requests.get(f"{FASTAPI_URL}/messages/recent/{user_id}")
     recent_messages = response_recent.json() if response_recent.status_code == 200 else []
 
     response_users = requests.get(f"{FASTAPI_URL}/users/")
@@ -78,9 +85,10 @@ def home():
 
 @app.route('/conversation/<int:other_user_id>')
 def conversation(other_user_id):
-    current_user_id = 1  # fake login for now
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    current_user_id = session.get('user_id', 1)  # fallback to 1 if not logged in
 
-    # Get the other user's info
     try:
         user_response = requests.get(f"{FASTAPI_URL}/users/{other_user_id}")
         other_user = user_response.json() if user_response.status_code == 200 else None
@@ -90,9 +98,17 @@ def conversation(other_user_id):
     if other_user is None:
         return "User not found.", 404
 
-    return render_template('conversation.html', other_user_id=other_user_id, other_user_name=other_user['username'])
+    return render_template(
+        'conversation.html',
+        other_user_id=other_user_id,
+        other_user_name=other_user['username'],
+        current_user_id=current_user_id
+    )
 
-
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug=True)
