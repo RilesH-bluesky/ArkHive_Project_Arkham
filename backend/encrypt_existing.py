@@ -7,6 +7,7 @@ from utils import encrypt_message, load_key
 key = load_key()
 
 # Connect to DB
+
 engine = create_engine("sqlite:///./backend/Arkham_DB.db")
 Session = sessionmaker(bind=engine)
 session = Session()

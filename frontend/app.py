@@ -14,6 +14,10 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 FASTAPI_URL = "http://127.0.0.1:8000"
 
+@app.route('/')
+def root():
+    return redirect(url_for('login'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
